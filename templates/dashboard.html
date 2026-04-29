@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EdTech Honeypot — Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header>
+    <div class="header-left">
+      <div class="logo-icon">⬡</div>
+      <div>
+        <h1>EdTech Honeypot</h1>
+        <span class="subtitle">Unauthorized Access Monitor</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="live-dot"></span>
+      <span class="live-label">LIVE</span>
+      <span class="refresh-hint">Auto-refreshes every 10s</span>
+    </div>
+  </header>
+
+  <!-- ── Stat cards ── -->
+  <section class="stats-grid">
+    <div class="stat-card accent-red">
+      <div class="stat-icon">⚡</div>
+      <div class="stat-value" id="stat-total">{{ stats.total_attacks }}</div>
+      <div class="stat-label">Total Attacks</div>
+    </div>
+    <div class="stat-card accent-amber">
+      <div class="stat-icon">◈</div>
+      <div class="stat-value" id="stat-ips">{{ stats.unique_ips }}</div>
+      <div class="stat-label">Unique IPs</div>
+    </div>
+    <div class="stat-card accent-cyan">
+      <div class="stat-icon">◉</div>
+      <div class="stat-value">8080</div>
+      <div class="stat-label">Honeypot Port</div>
+    </div>
+    <div class="stat-card accent-green">
+      <div class="stat-icon">▣</div>
+      <div class="stat-value">Active</div>
+      <div class="stat-label">Listener Status</div>
+    </div>
+  </section>
+
+  <!-- ── Attack log table ── -->
+  <section class="table-section">
+    <div class="table-header">
+      <h2>Attack Log</h2>
+      <span class="table-count" id="log-count">{{ logs | length }} entries</span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>IP Address</th>
+            <th>Port</th>
+            <th>First Seen</th>
+            <th>Last Seen</th>
+            <th>Attempts</th>
+            <th>Threat</th>
+          </tr>
+        </thead>
+        <tbody id="log-body">
+          {% if logs %}
+            {% for entry in logs %}
+            <tr class="log-row" style="animation-delay: {{ loop.index0 * 0.04 }}s">
+              <td class="row-num">{{ loop.index }}</td>
+              <td class="ip-cell">
+                <span class="ip-badge">{{ entry.ip }}</span>
+              </td>
+              <td class="mono">{{ entry.port }}</td>
+              <td class="mono muted">{{ entry.timestamp }}</td>
+              <td class="mono muted">{{ entry.last_seen }}</td>
+              <td>
+                <span class="attempt-badge {% if entry.attempts >= 5 %}high{% elif entry.attempts >= 2 %}med{% else %}low{% endif %}">
+                  {{ entry.attempts }}
+                </span>
+              </td>
+              <td>
+                {% if entry.attempts >= 5 %}
+                  <span class="threat high">● HIGH</span>
+                {% elif entry.attempts >= 2 %}
+                  <span class="threat med">● MED</span>
+                {% else %}
+                  <span class="threat low">● LOW</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="7" class="empty-state">
+                No attacks recorded yet. Listener is waiting...
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <span>EdTech Honeypot &nbsp;·&nbsp; Python Socket + Flask</span>
+    <span id="clock"></span>
+  </footer>
+
+  <script>
+    // Live clock
+    function tick() {
+      document.getElementById('clock').textContent = new Date().toLocaleString();
+    }
+    tick(); setInterval(tick, 1000);
+
+    // Auto-refresh stats + table every 10s
+    async function refresh() {
+      try {
+        const res  = await fetch('/api/logs');
+        const data = await res.json();
+
+        document.getElementById('stat-total').textContent = data.stats.total_attacks;
+        document.getElementById('stat-ips').textContent   = data.stats.unique_ips;
+        document.getElementById('log-count').textContent  = data.logs.length + ' entries';
+
+        const tbody = document.getElementById('log-body');
+        if (!data.logs.length) {
+          tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No attacks recorded yet. Listener is waiting...</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = data.logs.map((e, i) => {
+          const lvl = e.attempts >= 5 ? 'high' : e.attempts >= 2 ? 'med' : 'low';
+          const lbl = e.attempts >= 5 ? 'HIGH' : e.attempts >= 2 ? 'MED'  : 'LOW';
+          return `
+            <tr class="log-row">
+              <td class="row-num">${i+1}</td>
+              <td class="ip-cell"><span class="ip-badge">${e.ip}</span></td>
+              <td class="mono">${e.port}</td>
+              <td class="mono muted">${e.timestamp}</td>
+              <td class="mono muted">${e.last_seen}</td>
+              <td><span class="attempt-badge ${lvl}">${e.attempts}</span></td>
+              <td><span class="threat ${lvl}">● ${lbl}</span></td>
+            </tr>`;
+        }).join('');
+      } catch(e) { /* silently skip on network error */ }
+    }
+
+    setInterval(refresh, 10000);
+  </script>
+</body>
+</html>

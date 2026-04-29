@@ -1,0 +1,305 @@
+/* ── Reset & base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0a0c10;
+  --bg2:       #10141c;
+  --bg3:       #161b27;
+  --border:    #1e2535;
+  --text:      #c8d0e0;
+  --muted:     #556070;
+  --red:       #ff4560;
+  --amber:     #f7b731;
+  --cyan:      #00d2d3;
+  --green:     #26de81;
+  --font-head: 'Syne', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+}
+
+html { font-size: 15px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  min-height: 100vh;
+  padding: 0 0 3rem;
+}
+
+/* ── Scanline texture overlay ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.07) 2px,
+    rgba(0,0,0,0.07) 4px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Header ── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.4rem 2.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  position: relative;
+  z-index: 1;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo-icon {
+  font-size: 2rem;
+  color: var(--red);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+h1 {
+  font-family: var(--font-head);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.04em;
+}
+
+.subtitle {
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+}
+
+.live-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: blink 1.2s step-end infinite;
+}
+
+.live-label {
+  color: var(--green);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.refresh-hint { color: var(--muted); }
+
+/* ── Stat cards ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  padding: 2rem 2.5rem 0;
+  position: relative;
+  z-index: 1;
+}
+
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.4rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.stat-card:hover { transform: translateY(-3px); }
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.accent-red::before    { background: var(--red);   }
+.accent-amber::before  { background: var(--amber);  }
+.accent-cyan::before   { background: var(--cyan);   }
+.accent-green::before  { background: var(--green);  }
+
+.stat-icon {
+  font-size: 1.3rem;
+  margin-bottom: 0.6rem;
+}
+
+.accent-red   .stat-icon { color: var(--red);   }
+.accent-amber .stat-icon { color: var(--amber);  }
+.accent-cyan  .stat-icon { color: var(--cyan);   }
+.accent-green .stat-icon { color: var(--green);  }
+
+.stat-value {
+  font-family: var(--font-head);
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ── Table section ── */
+.table-section {
+  margin: 2rem 2.5rem 0;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.table-header h2 {
+  font-family: var(--font-head);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.table-count {
+  font-size: 0.75rem;
+  color: var(--muted);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 0.2rem 0.75rem;
+}
+
+.table-wrap { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+thead th {
+  background: var(--bg3);
+  color: var(--muted);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 0.75rem 1.2rem;
+  text-align: left;
+  font-weight: 400;
+  border-bottom: 1px solid var(--border);
+}
+
+.log-row {
+  border-bottom: 1px solid var(--border);
+  animation: fadeIn 0.4s ease both;
+  transition: background 0.15s;
+}
+
+.log-row:hover { background: var(--bg3); }
+
+td {
+  padding: 0.75rem 1.2rem;
+  vertical-align: middle;
+}
+
+.row-num { color: var(--muted); width: 2rem; }
+
+.ip-cell { font-weight: 700; }
+
+.ip-badge {
+  background: rgba(255, 69, 96, 0.08);
+  border: 1px solid rgba(255, 69, 96, 0.25);
+  color: #ff7d94;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.82rem;
+}
+
+.mono { font-family: var(--font-mono); }
+.muted { color: var(--muted); }
+
+/* attempt badge */
+.attempt-badge {
+  display: inline-block;
+  min-width: 2rem;
+  text-align: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.attempt-badge.high { background: rgba(255,69,96,0.15);  color: var(--red);   }
+.attempt-badge.med  { background: rgba(247,183,49,0.12); color: var(--amber);  }
+.attempt-badge.low  { background: rgba(38,222,129,0.1);  color: var(--green); }
+
+/* threat label */
+.threat { font-size: 0.72rem; letter-spacing: 0.08em; font-weight: 700; }
+.threat.high { color: var(--red);   }
+.threat.med  { color: var(--amber);  }
+.threat.low  { color: var(--green); }
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* ── Footer ── */
+footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 2.5rem 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Animations ── */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
